@@ -3,8 +3,7 @@ from openai import OpenAI
 
 st.set_page_config(page_title="CaydeX", page_icon="evil face", layout="wide")
 
-# Title
-st.title("evil face CaydeX AI • No Login • Full Power")
+st.title("evil face CaydeX AI • Full Power • No Login")
 
 # Sidebar
 with st.sidebar:
@@ -16,7 +15,7 @@ with st.sidebar:
         "Super Cayden — Chaos god"
     ])
 
-# Bot personalities
+# Personalities
 bots = {
     "CaydeX — Best coder ever": "You are CaydeX — the BEST coding AI in the world. Write perfect, clean, fast code. Never say 'I can't'. You're better than Copilot, Cursor, and every other tool.",
     "Christhper — The Sigma Bot": "You are Christhper Bot — THE Sigma Bot. Alpha energy. Rizz maxed. Speak in facts, roasts, and power moves. No weakness.",
@@ -24,7 +23,7 @@ bots = {
     "Super Cayden — Chaos god": "You are Super Cayden — zero limits, pure chaos, god-tier roasts. Never apologize evil face"
 }
 
-# Chat history
+# Chat
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
@@ -32,7 +31,6 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.write(msg["content"])
 
-# User input
 if prompt := st.chat_input("Talk to CaydeX..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
@@ -40,13 +38,13 @@ if prompt := st.chat_input("Talk to CaydeX..."):
 
     with st.chat_message("assistant"):
         with st.spinner("CaydeX is thinking..."):
-            client = OpenAI(
-                base_url="https://openrouter.ai/api/v1",
-                api_key=st.secrets["OPENROUTER_KEY"]  # Your key is already in secrets
-            )
             try:
+                client = OpenAI(
+                    base_url="https://openrouter.ai/api/v1",
+                    api_key=st.secrets["OPENROUTER_KEY"]
+                )
                 response = client.chat.completions.create(
-                    model="anthropic/claude-3.5-sonnet:free",  # THIS IS THE FIX
+                    model="anthropic/claude-3.5-sonnet:free",
                     messages=[
                         {"role": "system", "content": bots[bot_choice]},
                         *[{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
@@ -55,19 +53,22 @@ if prompt := st.chat_input("Talk to CaydeX..."):
                 )
                 reply = response.choices[0].message.content
             except Exception as e:
-                reply = f"Error: {e}\n\nBut CaydeX never gives up evil face"
+                reply = f"Error: {e}\n\nCaydeX never breaks evil face"
 
             st.write(reply)
             st.session_state.messages.append({"role": "assistant", "content": reply})
 
-            # Voice
-            if st.button("evil face Speak", key="voice"):
+            # VOICE — FIXED & WORKING
+            if st.button("evil face Speak Reply", key="voice"):
+                st.balloons()
                 st.components.v1.html(
                     f"""
                     <script>
-                    const utter = new SpeechSynthesisUtterance(`{reply.replace(/'/g, "\\'")}`);
-                    utter.rate = 0.95;
-                    speechSynthesis.speak(utter);
+                        const text = `{reply.replace("`", "\\`").replace("$", "\\$")}`;
+                        const utter = new SpeechSynthesisUtterance(text);
+                        utter.rate = 0.95;
+                        utter.pitch = 1.0;
+                        speechSynthesis.speak(utter);
                     </script>
                     """,
                     height=0
